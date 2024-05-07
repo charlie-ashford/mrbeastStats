@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MrBeast Statistics Twitter Profile</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/odometer/themes/odometer-theme-minimal.css" />
+<style>
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: #121212; /* Dark background for dark mode */
+    color: #ccc; /* Light text color for readability */
+    text-align: center;
+    padding-top: 30px;
+  }
+  a {
+    color: #4a90e2; /* Blue color for links */
+    text-decoration: none;
+  }
+  a:hover {
+    text-decoration: underline;
+  }
+  .profile {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 50px;
+    background: #1e1e1e; /* Darker shade for card */
+    border-radius: 20px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5); /* Deeper shadows for dark mode */
+    transition: all 0.3s ease;
+  }
+  .profile:hover {
+    box-shadow: 0 15px 30px rgba(0,0,0,0.75);
+  }
+  .banner-img {
+    width: 100%;
+    height: 320px;
+    object-fit: cover;
+    border-radius: 20px 20px 0 0;
+  }
+  .profile-img {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    border: 8px solid #333; /* Dark border for profile image */
+    margin-top: -90px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.5);
+  }
+  .odometer {
+    font-size: 80px;
+    font-weight: 900;
+    margin: 20px 0 30px;
+  }
+  .test-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    font-size: 14px;
+    background-color: #333; /* Dark button */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  .test-button:hover {
+    background-color: #555;
+  }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/odometer/odometer.min.js"></script>
+</head>
+<body>
+<div class="profile">
+  <img class="banner-img" id="banner-image" src="" alt="Profile Banner">
+  <img class="profile-img" id="profile-image" src="" alt="Profile Picture">
+  <h1><a href="https://twitter.com/@MrBeast_Stats" id="profile-name" target="_blank"></a></h1>
+  <h2 id="profile-username"></h2>
+  <div id="followers-count" class="odometer"></div>
+  <button class="test-button" onclick="startConfetti()">Test Confetti</button>
+</div>
+
+<script>
+async function fetchTwitterData() {
+  const apiUrl = 'https://nia-statistics.com/twitter/user/mrbeast_stats';
+  const response = await fetch(apiUrl);
+  const data = await response.json();
+  document.getElementById('banner-image').src = data.d.data.user.result.legacy.profile_banner_url;
+  document.getElementById('profile-image').src = data.d.data.user.result.legacy.profile_image_url_https.replace("_normal", "");
+  document.getElementById('profile-name').textContent = data.d.data.user.result.legacy.name;
+  document.getElementById('profile-name').href = "https://twitter.com/" + data.d.data.user.result.legacy.screen_name;
+  document.getElementById('profile-username').textContent = '@' + data.d.data.user.result.legacy.screen_name;
+  const odometerElement = document.getElementById('followers-count');
+  odometerElement.innerHTML = data.d.data.user.result.legacy.followers_count;
+
+  if (data.d.data.user.result.legacy.followers_count >= 70000) {
+    startConfetti();
+  }
+}
+
+setInterval(fetchTwitterData, 1000); 
+
+function startConfetti() {
+  var duration = 1 * 1000;
+  var animationEnd = Date.now() + duration;
+  var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0, scalar: 1.5 };
+
+  function randomInRange(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+
+  var interval = setInterval(function() {
+    var timeLeft = animationEnd - Date.now();
+    if (timeLeft <= 0) {
+      return clearInterval(interval);
+    }
+
+    var particleCount = 50 * (timeLeft / duration);  
+    confetti({
+      ...defaults,
+      particleCount,
+      origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+    });
+    confetti({
+      ...defaults,
+      particleCount,
+      origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+    });
+  }, 250);
+}
+</script>
+</body>
+</html>
