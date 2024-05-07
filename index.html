@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MrBeast Statistics Twitter Profile</title>
+<title>MrBeast Statistics Twitter Statistics</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/odometer/themes/odometer-theme-minimal.css" />
 <style>
@@ -114,7 +114,7 @@
 
 <script>
 async function fetchTwitterData() {
-  const apiUrl = 'https://nia-statistics.com/twitter/user/mrbeast';
+  const apiUrl = 'https://nia-statistics.com/twitter/user/mrbeast_stats';
   const response = await fetch(apiUrl);
   const data = await response.json();
   document.getElementById('banner-image').src = data.d.data.user.result.legacy.profile_banner_url;
