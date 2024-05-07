@@ -60,9 +60,13 @@
     border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.3s;
+    position: fixed;
+    right: 20px;
   }
-  .test-button:hover {
-    background-color: #555;
+  .test-button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
   }
   @media (min-width: 768px) {
     .profile {
@@ -83,9 +87,13 @@
       font-size: 80px;
     }
     .test-button {
-      position: fixed;
+      position: absolute;
       bottom: 20px;
-      right: 20px;
+    }
+    .test-button-container {
+      position: flex;
+      justify-content: center;
+      margin-top: 20;
     }
   }
 </style>
@@ -99,7 +107,9 @@
   <h1><a href="https://twitter.com/@MrBeast_Stats" id="profile-name" target="_blank"></a></h1>
   <h2 id="profile-username"></h2>
   <div id="followers-count" class="odometer"></div>
-  <button class="test-button" onclick="startConfetti()">Test Confetti</button>
+  <div class="test-button-container">
+    <button class="test-button" onclick="startConfetti()">Test Confetti</button>
+  </div>
 </div>
 
 <script>
@@ -118,9 +128,22 @@ async function fetchTwitterData() {
   if (data.d.data.user.result.legacy.followers_count >= 70000) {
     startConfetti();
   }
+
+  adjustButtonPosition();
 }
 
-setInterval(fetchTwitterData, 1000); 
+setInterval(fetchTwitterData, 1000);
+
+function adjustButtonPosition() {
+  const button = document.querySelector('.test-button');
+  const buttonRect = button.getBoundingClientRect();
+  const windowWidth = window.innerWidth;
+
+  if (windowWidth < buttonRect.right) {
+    const odometer = document.querySelector('.odometer');
+    odometer.insertAdjacentElement('afterend', button);
+  }
+}
 
 function startConfetti() {
   var duration = 1 * 1000;
