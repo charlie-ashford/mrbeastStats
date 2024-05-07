@@ -114,7 +114,7 @@
 
 <script>
 async function fetchTwitterData() {
-  const apiUrl = 'https://nia-statistics.com/twitter/user/mrbeast_stats';
+  const apiUrl = 'https://nia-statistics.com/twitter/user/mrbeast';
   const response = await fetch(apiUrl);
   const data = await response.json();
   document.getElementById('banner-image').src = data.d.data.user.result.legacy.profile_banner_url;
