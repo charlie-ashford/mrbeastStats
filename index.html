@@ -24,76 +24,100 @@
   .profile {
     max-width: 100%;
     margin: 0 auto;
-    padding: 20px;
+    padding: 18px;
     background: #1e1e1e;
-    border-radius: 20px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    border-radius: 18px;
+    box-shadow: 0 9px 18px rgba(0,0,0,0.5);
     transition: all 0.3s ease;
   }
   .profile:hover {
-    box-shadow: 0 15px 30px rgba(0,0,0,0.75);
+    box-shadow: 0 13.5px 27px rgba(0,0,0,0.75);
   }
   .banner-img, .profile-img {
     width: 100%;
     object-fit: cover;
   }
   .profile-img {
-    width: 150px;
-    height: 150px;
-    margin-top: -75px;
-    border-radius: 50%;
-    border: 8px solid #333;
-    box-shadow: 0 6px 12px rgba(0,0,0,0.5);
+    width: 135px;
+    height: 135px;
+    margin-top: -67.5px;
+    border-radius: 45%;
+    border: 7.2px solid #333;
+    box-shadow: 0 5.4px 10.8px rgba(0,0,0,0.5);
   }
   .odometer {
-    font-size: 3rem;
+    font-size: 2.7rem;
     font-weight: 900;
-    text-shadow: 2px 2px 4px #000; 
-    margin: 10px 0 20px;
+    text-shadow: 1.8px 1.8px 3.6px #000;
+    margin: 9px 0 18px;
+  }
+  .next-goal {
+    font-size: 1.35rem;
+    color: #ccc;
+    margin-top: 18px;
+  }
+  .next-goal strong {
+    font-weight: bold;
+  }
+  .progress-bar-container {
+    width: 72%;
+    margin: 18px auto;
+    background-color: #333;
+    border-radius: 9px;
+    overflow: hidden;
+  }
+  .progress-bar {
+    height: 18px;
+    background-color: #4a90e2;
+    width: 0;
+    transition: width 0.3s ease;
   }
   .test-button {
-    padding: 10px 20px;
-    font-size: 14px;
+    padding: 9px 18px;
+    font-size: 12.6px;
     background-color: #333;
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: 7.2px;
     cursor: pointer;
     transition: background-color 0.3s;
     position: fixed;
-    right: 20px;
+    right: 18px;
   }
   .test-button-container {
     display: flex;
     justify-content: center;
-    margin-top: 20px;
+    margin-top: 18px;
   }
   @media (min-width: 768px) {
     .profile {
-      max-width: 800px;
-      padding: 50px;
+      max-width: 720px;
+      padding: 45px;
     }
     .banner-img {
-      height: 320px;
-      border-radius: 20px 20px 0 0;
+      height: 288px;
+      border-radius: 18px 18px 0 0;
     }
     .profile-img {
-      width: 180px;
-      height: 180px;
-      margin-top: -90px;
-      border: 8px solid #333;
+      width: 162px;
+      height: 162px;
+      margin-top: -81px;
+      border: 7.2px solid #333;
     }
     .odometer {
-      font-size: 80px;
+      font-size: 72px;
+    }
+    .next-goal {
+      font-size: 1.8rem;
     }
     .test-button {
       position: absolute;
-      bottom: 20px;
+      bottom: 18px;
     }
     .test-button-container {
       position: flex;
       justify-content: center;
-      margin-top: 20;
+      margin-top: 18px;
     }
   }
 </style>
@@ -107,12 +131,17 @@
   <h1><a href="https://twitter.com/@MrBeast_Stats" id="profile-name" target="_blank"></a></h1>
   <h2 id="profile-username"></h2>
   <div id="followers-count" class="odometer"></div>
+  <div class="next-goal" id="next-goal"><strong>Next Goal:</strong> </div>
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="progress-bar"></div>
+  </div>
   <div class="test-button-container">
     <button class="test-button" onclick="startConfetti()">Test Confetti</button>
   </div>
 </div>
-
 <script>
+let confettiStarted = false;
+
 async function fetchTwitterData() {
   const apiUrl = 'https://nia-statistics.com/twitter/user/mrbeast_stats';
   const response = await fetch(apiUrl);
@@ -122,23 +151,64 @@ async function fetchTwitterData() {
   document.getElementById('profile-name').textContent = data.d.data.user.result.legacy.name;
   document.getElementById('profile-name').href = "https://twitter.com/" + data.d.data.user.result.legacy.screen_name;
   document.getElementById('profile-username').textContent = '@' + data.d.data.user.result.legacy.screen_name;
+  const followersCount = data.d.data.user.result.legacy.followers_count;
   const odometerElement = document.getElementById('followers-count');
-  odometerElement.innerHTML = data.d.data.user.result.legacy.followers_count;
-
-  if (data.d.data.user.result.legacy.followers_count >= 70000) {
-    startConfetti();
+  odometerElement.innerHTML = followersCount.toLocaleString();
+  const { nextGoal, previousGoalUpdated } = getNextGoal(followersCount);
+  updateProgressBar(followersCount, nextGoal, previousGoalUpdated);
+  if (nextGoal !== null) {
+    document.getElementById('next-goal').innerHTML = `<strong>Next Goal:</strong> ${nextGoal.toLocaleString()}`;
   }
-
+  if (followersCount >= previousGoalUpdated) {
+    if (nextGoal !== null && followersCount >= nextGoal && !confettiStarted) {
+      startConfetti();
+      confettiStarted = true;
+      updateGoal(nextGoal);
+    }
+  } else {
+    confettiStarted = false;
+  }
   adjustButtonPosition();
 }
 
-setInterval(fetchTwitterData, 1000);
+function getNextGoal(followersCount) {
+  let nextGoal;
+  let previousGoalUpdated;
+
+  if (followersCount < 500000) {
+    nextGoal = Math.ceil((followersCount + 1) / 1000) * 1000;
+    previousGoalUpdated = nextGoal - 1000;
+  } else if (followersCount < 1000000) {
+    nextGoal = Math.ceil((followersCount + 1) / 5000) * 5000;
+    previousGoalUpdated = nextGoal - 5000;
+  } else if (followersCount < 10000000) {
+    nextGoal = Math.ceil((followersCount + 1) / 10000) * 10000;
+    previousGoalUpdated = nextGoal - 10000;
+  } else if (followersCount < 50000000) {
+    nextGoal = Math.ceil((followersCount + 1) / 50000) * 50000;
+    previousGoalUpdated = nextGoal - 50000;
+  } else if (followersCount < 100000000) {
+    nextGoal = Math.ceil((followersCount + 1) / 100000) * 100000;
+    previousGoalUpdated = nextGoal - 100000;
+  } else {
+    nextGoal = Math.ceil((followersCount + 1) / 1000000) * 1000000;
+    previousGoalUpdated = nextGoal - 1000000;
+  }
+
+  return { nextGoal, previousGoalUpdated };
+}
+
+function updateProgressBar(currentCount, nextGoal, previousGoalUpdated) {
+  const progressBar = document.getElementById('progress-bar');
+  const progressBarStart = previousGoalUpdated;
+  const percentage = ((currentCount - progressBarStart) / (nextGoal - progressBarStart)) * 100;
+  progressBar.style.width = `${percentage}%`;
+}
 
 function adjustButtonPosition() {
   const button = document.querySelector('.test-button');
   const buttonRect = button.getBoundingClientRect();
   const windowWidth = window.innerWidth;
-
   if (windowWidth < buttonRect.right) {
     const odometer = document.querySelector('.odometer');
     odometer.insertAdjacentElement('afterend', button);
@@ -146,33 +216,38 @@ function adjustButtonPosition() {
 }
 
 function startConfetti() {
-  var duration = 1 * 1000;
-  var animationEnd = Date.now() + duration;
-  var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0, scalar: 1.5 };
+  if (!confettiStarted) {
+    var duration = 1 * 1000;
+    var animationEnd = Date.now() + duration;
+    var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0, scalar: 1.5 };
 
-  function randomInRange(min, max) {
-    return Math.random() * (max - min) + min;
-  }
-
-  var interval = setInterval(function() {
-    var timeLeft = animationEnd - Date.now();
-    if (timeLeft <= 0) {
-      return clearInterval(interval);
+    function randomInRange(min, max) {
+      return Math.random() * (max - min) + min;
     }
 
-    var particleCount = 50 * (timeLeft / duration);  
-    confetti({
-      ...defaults,
-      particleCount,
-      origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
-    });
-    confetti({
-      ...defaults,
-      particleCount,
-      origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
-    });
-  }, 250);
+    var interval = setInterval(function () {
+      var timeLeft = animationEnd - Date.now();
+      if (timeLeft <= 0) {
+        clearInterval(interval);
+        confettiStarted = false;
+      }
+
+      var particleCount = 50 * (timeLeft / duration);
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+      });
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+      });
+    }, 250);
+  }
 }
+
+setInterval(fetchTwitterData, 2000);
 </script>
 </body>
 </html>
