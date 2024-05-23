@@ -143,16 +143,15 @@
 let confettiStarted = false;
 
 async function fetchTwitterData() {
-  const apiUrl = 'https://axern.space/api/get?platform=twitter&type=user&id=1295551679862124545';
+  const apiUrl = 'https://nia-statistics.com/twitter/user/mrbeast_stats';
   const response = await fetch(apiUrl);
   const data = await response.json();
-  
-  document.getElementById('banner-image').src = data.user.banner;
-  document.getElementById('profile-image').src = data.user.image;
-  document.getElementById('profile-name').textContent = data.user.name;
-  document.getElementById('profile-name').href = "https://twitter.com/" + data.user.username;
-  document.getElementById('profile-username').textContent = '@' + data.user.username;
-  const followersCount = data.apiFollowerCount;
+  document.getElementById('banner-image').src = data.d.data.user.result.legacy.profile_banner_url;
+  document.getElementById('profile-image').src = data.d.data.user.result.legacy.profile_image_url_https.replace("_normal", "");
+  document.getElementById('profile-name').textContent = data.d.data.user.result.legacy.name;
+  document.getElementById('profile-name').href = "https://twitter.com/" + data.d.data.user.result.legacy.screen_name;
+  document.getElementById('profile-username').textContent = '@' + data.d.data.user.result.legacy.screen_name;
+  const followersCount = data.d.data.user.result.legacy.followers_count;
   const odometerElement = document.getElementById('followers-count');
   odometerElement.innerHTML = followersCount.toLocaleString();
   const { nextGoal, previousGoalUpdated } = getNextGoal(followersCount);
