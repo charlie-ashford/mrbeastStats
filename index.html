@@ -143,7 +143,7 @@
 let confettiStarted = false;
 
 async function fetchTwitterData() {
-  const apiUrl = 'https://nia-statistics.com/twitter/user/mrbeast_stats';
+  const apiUrl = 'twitter.nia-statistics.com/user/mrbeast_stats';
   const response = await fetch(apiUrl);
   const data = await response.json();
   document.getElementById('banner-image').src = data.d.data.user.result.legacy.profile_banner_url;
